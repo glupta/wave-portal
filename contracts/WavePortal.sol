@@ -39,10 +39,10 @@ contract WavePortal {
 
     function wave(string memory _message) public {
         /*
-         * We need to make sure the current timestamp is at least 15 seconds bigger than the last timestamp we stored
+         * We need to make sure the current timestamp is at least 30 seconds bigger than the last timestamp we stored
          */
         require(
-            lastWavedAt[msg.sender] + 15 seconds < block.timestamp, 
+            lastWavedAt[msg.sender] + 30 seconds < block.timestamp, 
             "Must wait 30 seconds before waving again."
         );
 
@@ -71,7 +71,7 @@ contract WavePortal {
             /*
              * The same code we had before to send the prize.
              */
-            uint256 prizeAmount = 0.0001 ether;
+            uint256 prizeAmount = 0.01 ether;
             require(
                 prizeAmount <= address(this).balance,
                 "Trying to withdraw more money than the contract has."
