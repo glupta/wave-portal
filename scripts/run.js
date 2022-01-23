@@ -1,37 +1,21 @@
 const main = async () => {
-    const waveContractFactory = await hre.ethers.getContractFactory("WavePortal");
-    const waveContract = await waveContractFactory.deploy({
-      value: hre.ethers.utils.parseEther("0.1"),
-    });
+    const waveContractFactory = await hre.ethers.getContractFactory("Web3pedia");
+    const waveContract = await waveContractFactory.deploy();
     await waveContract.deployed();
     console.log("Contract addy:", waveContract.address);
   
-    let contractBalance = await hre.ethers.provider.getBalance(
-      waveContract.address
-    );
-    console.log(
-      "Contract balance:",
-      hre.ethers.utils.formatEther(contractBalance)
-    );
-  
-    /*
-     * Let's try two waves now
-     */
-    const waveTxn = await waveContract.wave("This is wave #1");
+    const waveTxn = await waveContract.ask("This is wave #1");
     await waveTxn.wait();
-  
-    contractBalance = await hre.ethers.provider.getBalance(waveContract.address);
-    console.log(
-      "Contract balance:",
-      hre.ethers.utils.formatEther(contractBalance)
-    );
-  
-    let allWaves = await waveContract.getAllWaves();
-    console.log(allWaves);
-  
-    const waveTxn2 = await waveContract.wave("This is wave #2");
+    console.log(waveTxn);
+
+    const waveTxn2 = await waveContract.answer(1, "This is wave #1");
     await waveTxn2.wait();
-  };
+    console.log(waveTxn2);
+
+    const waveTxn3 = await waveContract.answer(1, "This is wave #2");
+    await waveTxn3.wait();
+    console.log(waveTxn3);
+  }
   
   const runMain = async () => {
     try {

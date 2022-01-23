@@ -1,12 +1,8 @@
 const main = async () => {
-    const waveContractFactory = await hre.ethers.getContractFactory("WavePortal");
-    const waveContract = await waveContractFactory.deploy({
-      value: hre.ethers.utils.parseEther("0.2"),
-    });
-  
+    const waveContractFactory = await hre.ethers.getContractFactory("Web3pedia");
+    const waveContract = await waveContractFactory.deploy({});
     await waveContract.deployed();
-  
-    console.log("WavePortal address: ", waveContract.address);
+    console.log("Web3pedia address: ", waveContract.address);
   };
   
   const runMain = async () => {

@@ -4,93 +4,69 @@ pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
 
-contract WavePortal {
-    uint256 totalWaves;
-
-    /*
-     * We will be using this below to help generate a random number
-     */
-    uint256 private seed;
-
-    event NewWave(address indexed from, uint256 timestamp, string message, bool isWinner);
-
-    struct Wave {
-        address waver;
-        string message;
-        uint256 timestamp;
-        bool isWinner;
-    }
-
-    Wave[] waves;
-
+contract Web3pedia {
+    uint256 questionId;
+    mapping(uint256 => uint256) answerIds;
     /*
      * This is an address => uint mapping, meaning I can associate an address with a number!
      * In this case, I'll be storing the address with the last time the user waved at us.
      */
-    mapping(address => uint256) public lastWavedAt;
+    mapping(address => uint256) public lastAsked;
+    mapping(address => uint256) public lastAnswered;
+
+
+    event NewQuestion(
+        uint256 question_id, 
+        uint256 timestamp, 
+        address indexed from, 
+        string question, 
+        uint256 stake //in gwei
+    );
+
+    event NewAnswer(
+        uint256 answer_id,
+        uint256 question_id,
+        uint256 timestamp, 
+        address indexed from, 
+        string answer
+    );
 
     constructor() payable {
         console.log("We have been constructed!");
-        /*
-         * Set the initial seed
-         */
-        seed = (block.timestamp + block.difficulty) % 100;
     }
 
-    function wave(string memory _message) public {
-        /*
+    function ask(string memory _question) public {
+       /*
          * We need to make sure the current timestamp is at least 30 seconds bigger than the last timestamp we stored
          */
-        require(
-            lastWavedAt[msg.sender] + 30 seconds < block.timestamp, 
-            "Must wait 30 seconds before waving again."
-        );
+        require(lastAsked[msg.sender] + 30 seconds < block.timestamp, "Must wait 30 seconds before waving again.");
 
         /*
          * Update the current timestamp we have for the user
          */
-        lastWavedAt[msg.sender] = block.timestamp;
+        lastAsked[msg.sender] = block.timestamp;
 
-        totalWaves += 1;
-        console.log("%s has waved!", msg.sender);
-
-        /*
-         * Generate a new seed for the next user that sends a wave
-         */
-        seed = (block.difficulty + block.timestamp + seed) % 100;
-
-        console.log("Random # generated: %d", seed);
-
-        /*
-         * Give a 50% chance that the user wins the prize.
-         */
-        bool isWinner = false;
-        if (seed <= 50) {
-            console.log("%s won!", msg.sender);
-
-            /*
-             * The same code we had before to send the prize.
-             */
-            uint256 prizeAmount = 0.01 ether;
-            require(
-                prizeAmount <= address(this).balance,
-                "Trying to withdraw more money than the contract has."
-            );
-            (bool success, ) = (msg.sender).call{value: prizeAmount}("");
-            require(success, "Failed to withdraw money from contract.");
-            isWinner = true;
-        }
-
-        waves.push(Wave(msg.sender, _message, block.timestamp, isWinner));
-
-        emit NewWave(msg.sender, block.timestamp, _message, isWinner);
+        questionId += 1;
+        console.log("id: %d, time: %d, question: %s", questionId, block.timestamp, _question);
+        console.log("sender", msg.sender);
+        emit NewQuestion(questionId, block.timestamp, msg.sender, _question, 100000);
     }
 
-    function getAllWaves() public view returns (Wave[] memory) {
-        return waves;
-    }
+    function answer(uint256 currentQuestionId, string memory _answer) public {
+        /*
+         * We need to make sure the current timestamp is at least 30 seconds bigger than the last timestamp we stored
+         */
+        require(lastAnswered[msg.sender] + 30 seconds < block.timestamp, "Must wait 30 seconds before waving again.");
 
-    function getTotalWaves() public view returns (uint256) {
-        return totalWaves;
+        /*
+         * Update the current timestamp we have for the user
+         */
+        lastAnswered[msg.sender] = block.timestamp;
+
+        answerIds[currentQuestionId] += 1;
+        console.log("questionId: %d, time: %d, answer: %s", currentQuestionId, block.timestamp, _answer);
+        console.log("sender", msg.sender);
+        console.log("answerId", answerIds[currentQuestionId]);
+        emit NewAnswer(answerIds[currentQuestionId], currentQuestionId, block.timestamp, msg.sender, _answer);
     }
 }
